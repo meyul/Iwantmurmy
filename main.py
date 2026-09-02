@@ -194,7 +194,7 @@ with st.container():
     
     st.markdown(f"""
     <div class='insight-container'>
-        <b>💡 이 그래프로 알 수 있는 것</b><br>
+        <b>💡 이 GRAPH로 알 수 있는 것</b><br>
         대부분의 영화는 관객수 <span class='highlight'>{most_common_range}</span> 구간에 밀집되어 있으며,<br>
         분석 대상 중 최대 흥행작은 <span class='highlight'>{max_movie['movieNm']}</span>(총 관객수 약 {max_movie['total_audi']/10000:.0f}만 명)입니다.
     </div>
@@ -241,14 +241,13 @@ with st.container():
     st.markdown("</div>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# [그래프 5] 상자 그림(Box Plot) - 주요 장르별 관객수 분포 (신규 추가)
+# [그래프 5] 상자 그림(Box Plot) - 주요 장르별 관객수 분포
 # ---------------------------------------------------------
 with st.container():
     st.markdown("<div class='graph-card'>", unsafe_allow_html=True)
     st.markdown("<div class='section-title'>5. 주요 장르별 총 관객수 분포 비교 (상자 그림)</div>", unsafe_allow_html=True)
     st.markdown("<div class='section-subtitle'>영화 수 10편 이상인 장르의 관객수 중앙값 및 이상치(Outlier) 확인</div>", unsafe_allow_html=True)
     
-    # 영화 수가 10편 이상인 장르 필터링
     genre_counts = df['genre'].value_counts()
     major_genres = genre_counts[genre_counts >= 10].index
     df_major = df[df['genre'].isin(major_genres)]
@@ -259,7 +258,7 @@ with st.container():
         y='total_audi',
         color='genre',
         hover_name='movieNm',
-        points='outliers',  # 박스 바깥의 이상치 개별 포인트 표시
+        points='outliers',
         labels={'genre': '장르', 'total_audi': '총 관객수'},
         color_discrete_sequence=PASTEL_PALETTE
     )
@@ -282,6 +281,54 @@ with st.container():
     <div class='insight-container'>
         <b>💡 이 그래프로 알 수 있는 것</b><br>
         주요 장르별 관객수의 중앙값과 상하위 편차를 한눈에 파악할 수 있으며, 상자 밖으로 멀리 떨어진 점(이상치)을 통해 동일 장르 내에서 대흥행을 기록한 대표 영화를 찾아낼 수 있습니다.
+    </div>
+    """, unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+# ---------------------------------------------------------
+# [그래프 6] 버블 차트 - 개봉일 스크린수 vs 총 관객수 (첫 주 관객수 크기) (신규 추가)
+# ---------------------------------------------------------
+with st.container():
+    st.markdown("<div class='graph-card'>", unsafe_allow_html=True)
+    st.markdown("<div class='section-title'>6. 스크린수, 총 관객수, 첫 주 관객수의 입체적 분석 (버블 차트)</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-subtitle'>버블의 크기는 개봉 첫 주 관객수(first_week_audi)를 나타냅니다</div>", unsafe_allow_html=True)
+    
+    fig6 = px.scatter(
+        df,
+        x='first_scrn',
+        y='total_audi',
+        size='first_week_audi',
+        color='genre',
+        hover_name='movieNm',
+        size_max=40,  # 버블 크기 조정
+        labels={
+            'first_scrn': '개봉일 스크린수',
+            'total_audi': '총 관객수',
+            'first_week_audi': '첫 주 관객수',
+            'genre': '장르'
+        },
+        color_discrete_sequence=PASTEL_PALETTE
+    )
+    
+    fig6.update_traces(
+        marker=dict(opacity=0.75, line=dict(width=1, color='white')),
+        hovertemplate="<b>%{hovertext}</b><br><br>개봉일 스크린수: %{x:,}개<br>총 관객수: %{y:,}명<br>첫 주 관객수: %{marker.size:,}명"
+    )
+    
+    fig6.update_layout(
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        xaxis=dict(gridcolor='rgba(200, 200, 200, 0.2)', title="개봉일 스크린수 (개)"),
+        yaxis=dict(gridcolor='rgba(200, 200, 200, 0.2)', title="총 관객수 (명)"),
+        legend_title_text="장르"
+    )
+    
+    st.plotly_chart(fig6, use_container_width=True)
+    
+    st.markdown("""
+    <div class='insight-container'>
+        <b>💡 이 그래프로 알 수 있는 것</b><br>
+        버블의 크기가 클수록 개봉 첫 주 초반 흥행 동력이 강했음을 의미합니다. 개봉일 스크린수가 다소 적었더라도 첫 주 관객수(버블 크기)가 커지며 입소문을 타고 최종 총 관객수(Y축)가 급증한 영화들을 한눈에 식별할 수 있습니다.
     </div>
     """, unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
