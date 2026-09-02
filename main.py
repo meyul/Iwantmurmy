@@ -102,7 +102,7 @@ def load_data():
 
 df = load_data()
 
-# 세련된 파스텔 팔레트 (다채로우면서 시각적으로 상충되지 않는 색상)
+# 세련된 파스텔 팔레트
 PASTEL_PALETTE = [
     "#9AE6B4", "#90CDF4", "#FBB6CE", "#FBD38D", "#E9D8FD",
     "#FEB2B2", "#CBD5E0", "#B2F5EA", "#FAF089", "#D6BCFA"
@@ -202,7 +202,7 @@ with st.container():
     st.markdown("</div>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# [그래프 4] 산점도 - 개봉일 스크린수 vs 총 관객수 (신규 추가)
+# [그래프 4] 산점도 - 개봉일 스크린수 vs 총 관객수
 # ---------------------------------------------------------
 with st.container():
     st.markdown("<div class='graph-card'>", unsafe_allow_html=True)
@@ -218,13 +218,10 @@ with st.container():
         labels={'first_scrn': '개봉일 스크린수', 'total_audi': '총 관객수', 'genre': '장르'},
         color_discrete_sequence=PASTEL_PALETTE
     )
-    
-    # 마우스오버(Hover) 시 영화명, 스크린수, 총관객수를 명확히 보여주도록 설정
     fig4.update_traces(
         marker=dict(size=11, opacity=0.85, line=dict(width=1, color='white')),
         hovertemplate="<b>%{hovertext}</b><br><br>개봉일 스크린수: %{x:,}개<br>총 관객수: %{y:,}명"
     )
-    
     fig4.update_layout(
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
@@ -243,3 +240,50 @@ with st.container():
     """, unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
+# ---------------------------------------------------------
+# [그래프 5] 상자 그림(Box Plot) - 주요 장르별 관객수 분포 (신규 추가)
+# ---------------------------------------------------------
+with st.container():
+    st.markdown("<div class='graph-card'>", unsafe_allow_html=True)
+    st.markdown("<div class='section-title'>5. 주요 장르별 총 관객수 분포 비교 (상자 그림)</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-subtitle'>영화 수 10편 이상인 장르의 관객수 중앙값 및 이상치(Outlier) 확인</div>", unsafe_allow_html=True)
+    
+    # 영화 수가 10편 이상인 장르 필터링
+    genre_counts = df['genre'].value_counts()
+    major_genres = genre_counts[genre_counts >= 10].index
+    df_major = df[df['genre'].isin(major_genres)]
+    
+    fig5 = px.box(
+        df_major,
+        x='genre',
+        y='total_audi',
+        color='genre',
+        hover_name='movieNm',
+        points='outliers',  # 박스 바깥의 이상치 개별 포인트 표시
+        labels={'genre': '장르', 'total_audi': '총 관객수'},
+        color_discrete_sequence=PASTEL_PALETTE
+    )
+    
+    fig5.update_traces(
+        hovertemplate="<b>%{hovertext}</b><br>장르: %{x}<br>총 관객수: %{y:,}명"
+    )
+    
+    fig5.update_layout(
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        xaxis=dict(gridcolor='rgba(200, 200, 200, 0.2)', title="주요 장르"),
+        yaxis=dict(gridcolor='rgba(200, 200, 200, 0.2)', title="총 관객수 (명)"),
+        showlegend=False
+    )
+    
+    st.plotly_chart(fig5, use_container_width=True)
+    
+    st.markdown("""
+    <div class='insight-container'>
+        <b>💡 이 그래프로 알 수 있는 것</b><br>
+        주요 장르별 관객수의 중앙값과 상하위 편차를 한눈에 파악할 수 있으며, 상자 밖으로 멀리 떨어진 점(이상치)을 통해 동일 장르 내에서 대흥행을 기록한 대표 영화를 찾아낼 수 있습니다.
+    </div>
+    """, unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+st.caption("데이터 출처: KOBIS 영화관 입장권 통합전산망")
