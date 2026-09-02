@@ -194,7 +194,7 @@ with st.container():
     
     st.markdown(f"""
     <div class='insight-container'>
-        <b>💡 이 GRAPH로 알 수 있는 것</b><br>
+        <b>💡 이 그래프로 알 수 있는 것</b><br>
         대부분의 영화는 관객수 <span class='highlight'>{most_common_range}</span> 구간에 밀집되어 있으며,<br>
         분석 대상 중 최대 흥행작은 <span class='highlight'>{max_movie['movieNm']}</span>(총 관객수 약 {max_movie['total_audi']/10000:.0f}만 명)입니다.
     </div>
@@ -286,7 +286,7 @@ with st.container():
     st.markdown("</div>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# [그래프 6] 버블 차트 - 개봉일 스크린수 vs 총 관객수 (첫 주 관객수 크기) (신규 추가)
+# [그래프 6] 버블 차트 - 개봉일 스크린수 vs 총 관객수 (첫 주 관객수 크기)
 # ---------------------------------------------------------
 with st.container():
     st.markdown("<div class='graph-card'>", unsafe_allow_html=True)
@@ -300,7 +300,7 @@ with st.container():
         size='first_week_audi',
         color='genre',
         hover_name='movieNm',
-        size_max=40,  # 버블 크기 조정
+        size_max=40,
         labels={
             'first_scrn': '개봉일 스크린수',
             'total_audi': '총 관객수',
@@ -329,6 +329,39 @@ with st.container():
     <div class='insight-container'>
         <b>💡 이 그래프로 알 수 있는 것</b><br>
         버블의 크기가 클수록 개봉 첫 주 초반 흥행 동력이 강했음을 의미합니다. 개봉일 스크린수가 다소 적었더라도 첫 주 관객수(버블 크기)가 커지며 입소문을 타고 최종 총 관객수(Y축)가 급증한 영화들을 한눈에 식별할 수 있습니다.
+    </div>
+    """, unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+# ---------------------------------------------------------
+# [그래프 7] 선버스트 차트 - 국가별 장르 분포 계층 (신규 추가)
+# ---------------------------------------------------------
+with st.container():
+    st.markdown("<div class='graph-card'>", unsafe_allow_html=True)
+    st.markdown("<div class='section-title'>7. 제작 국가 및 장르 계층 구조 (선버스트 차트)</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-subtitle'>안쪽 원(국가)에서 바깥쪽 원(장르)으로 이어지는 영화 편수 계층 구조</div>", unsafe_allow_html=True)
+    
+    fig7 = px.sunburst(
+        df,
+        path=['nation', 'genre'],
+        color_discrete_sequence=PASTEL_PALETTE
+    )
+    
+    fig7.update_traces(
+        hovertemplate="<b>%{label}</b><br>영화 편수: %{value}편<br>비율: %{percentParent:.1%}"
+    )
+    
+    fig7.update_layout(
+        margin=dict(t=10, l=10, r=10, b=10),
+        paper_bgcolor='rgba(0,0,0,0)'
+    )
+    
+    st.plotly_chart(fig7, use_container_width=True)
+    
+    st.markdown("""
+    <div class='insight-container'>
+        <b>💡 이 그래프로 알 수 있는 것</b><br>
+        국가별로 제작되거나 수입되는 주요 장르 구성의 차이를 확인할 수 있으며, 각 국가 내에서 특정 장르가 차지하는 비중과 전체 영화 수 대비 국가별 점유율을 한눈에 비교할 수 있습니다.
     </div>
     """, unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
