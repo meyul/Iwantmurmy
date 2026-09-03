@@ -17,12 +17,32 @@ def load_data():
 
 df = load_data()
 
-# 3. 🎨 4가지 테마 팔레트 & CSS 정의
+# 3. 🎨 폰트 설정
+FONTS = {
+    "Pretendard (트렌디한 산세리프)": {
+        "family": "'Pretendard', -apple-system, sans-serif",
+        "import_url": "@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');"
+    },
+    "Noto Sans KR (깔끔한 산세리프)": {
+        "family": "'Noto Sans KR', sans-serif",
+        "import_url": "@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;600;700&display=swap');"
+    },
+    "고운바탕 (감성적인 세리프/바탕)": {
+        "family": "'Gowun Batang', serif",
+        "import_url": "@import url('https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap');"
+    },
+    "나눔고딕 (클래식 고딕)": {
+        "family": "'Nanum Gothic', sans-serif",
+        "import_url": "@import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap');"
+    }
+}
+
+# 4. 🎨 4가지 테마 팔레트 정의
 THEMES = {
     "🌸 봄날의 벚꽃 (Cherry Blossom)": {
         "bg": "linear-gradient(135deg, #FFFBFC 0%, #FCE4EC 50%, #F3E5F5 100%)",
-        "card_bg": "rgba(255, 255, 255, 0.75)",
-        "card_border": "rgba(248, 187, 208, 0.5)",
+        "card_bg": "rgba(255, 255, 255, 0.8)",
+        "card_border": "rgba(248, 187, 208, 0.6)",
         "text_main": "#4A154B",
         "text_sub": "#AD1457",
         "highlight": "#D81B60",
@@ -30,8 +50,8 @@ THEMES = {
     },
     "🌃 시티팝 나이트 (City Pop)": {
         "bg": "linear-gradient(135deg, #0F172A 0%, #1E1B4B 50%, #311042 100%)",
-        "card_bg": "rgba(30, 27, 75, 0.55)",
-        "card_border": "rgba(192, 132, 252, 0.3)",
+        "card_bg": "rgba(30, 27, 75, 0.65)",
+        "card_border": "rgba(192, 132, 252, 0.4)",
         "text_main": "#F3E8FF",
         "text_sub": "#C084FC",
         "highlight": "#F472B6",
@@ -39,8 +59,8 @@ THEMES = {
     },
     "☕ 따뜻한 우드 라떼 (Warm Latte)": {
         "bg": "linear-gradient(135deg, #FAF8F5 0%, #F5EBE6 50%, #EBD9CE 100%)",
-        "card_bg": "rgba(255, 253, 250, 0.8)",
-        "card_border": "rgba(215, 186, 167, 0.5)",
+        "card_bg": "rgba(255, 253, 250, 0.85)",
+        "card_border": "rgba(215, 186, 167, 0.6)",
         "text_main": "#3D2B1F",
         "text_sub": "#8C6D58",
         "highlight": "#B85B35",
@@ -48,8 +68,8 @@ THEMES = {
     },
     "🌊 에메랄드 오션 (Emerald Ocean)": {
         "bg": "linear-gradient(135deg, #F0FDF4 0%, #E0F2FE 50%, #E0E7FF 100%)",
-        "card_bg": "rgba(255, 255, 255, 0.75)",
-        "card_border": "rgba(125, 211, 252, 0.5)",
+        "card_bg": "rgba(255, 255, 255, 0.8)",
+        "card_border": "rgba(125, 211, 252, 0.6)",
         "text_main": "#0F172A",
         "text_sub": "#0284C7",
         "highlight": "#0D9488",
@@ -57,23 +77,23 @@ THEMES = {
     }
 }
 
-# 사이드바 테마 스위처
-st.sidebar.markdown("### 🎨 Mood & Theme")
-selected_theme_name = st.sidebar.selectbox(
-    "어떤 분위기에서 감상할까요?",
-    list(THEMES.keys()),
-    index=0
-)
+# 사이드바 컨트롤러
+st.sidebar.markdown("## 🎨 디자인 커스텀")
+
+selected_font_name = st.sidebar.selectbox("🔤 폰트 스타일 선택", list(FONTS.keys()), index=0)
+selected_theme_name = st.sidebar.selectbox("🌈 테마 분위기 선택", list(THEMES.keys()), index=0)
+
+current_font = FONTS[selected_font_name]
 current_theme = THEMES[selected_theme_name]
 PASTEL_PALETTE = current_theme["palette"]
 
-# 4. Dynamic CSS 적용 (글래스모피즘 + 호버 애니메이션)
+# 5. Dynamic CSS 적용 (글래스모피즘 + 폰트 + 애니메이션)
 st.markdown(f"""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;600;700&display=swap');
+    {current_font['import_url']}
 
-    html, body, [class*="css"] {{
-        font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+    html, body, [class*="css"], .stMarkdown, .stButton button {{
+        font-family: {current_font['family']} !important;
     }}
 
     /* 선택된 테마 배경 */
@@ -85,61 +105,61 @@ st.markdown(f"""
     /* 글래스모피즘 카드 & Floating 호버 애니메이션 */
     .graph-card {{
         background: {current_theme['card_bg']};
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
         border: 1px solid {current_theme['card_border']};
         border-radius: 28px;
-        padding: 32px;
-        box-shadow: 0 12px 32px 0 rgba(0, 0, 0, 0.05);
+        padding: 36px;
+        box-shadow: 0 16px 40px 0 rgba(0, 0, 0, 0.04);
         margin-bottom: 35px;
         transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }}
 
     .graph-card:hover {{
-        transform: translateY(-8px) scale(1.005);
-        box-shadow: 0 20px 40px 0 rgba(0, 0, 0, 0.12);
+        transform: translateY(-8px);
+        box-shadow: 0 24px 48px 0 rgba(0, 0, 0, 0.12);
         border-color: {current_theme['highlight']};
     }}
 
     /* 메인 타이틀 & 글자 색상 */
     .hero-banner {{
         text-align: center;
-        padding: 30px 20px 10px 20px;
-        margin-bottom: 25px;
+        padding: 40px 20px 20px 20px;
+        margin-bottom: 30px;
     }}
     
     .hero-title {{
-        font-size: 2.5rem;
+        font-size: 2.7rem;
         font-weight: 700;
         color: {current_theme['text_main']};
-        margin-bottom: 8px;
+        margin-bottom: 10px;
         letter-spacing: -0.5px;
     }}
     
     .hero-desc {{
         color: {current_theme['text_sub']};
-        font-size: 1.05rem;
+        font-size: 1.1rem;
     }}
 
     .section-title {{
         color: {current_theme['text_main']};
-        font-size: 1.35rem;
+        font-size: 1.4rem;
         font-weight: 700;
-        margin-bottom: 5px;
+        margin-bottom: 6px;
     }}
     
     .section-subtitle {{
         color: {current_theme['text_sub']};
-        font-size: 0.92rem;
-        margin-bottom: 20px;
+        font-size: 0.95rem;
+        margin-bottom: 22px;
     }}
 
     .insight-container {{
-        background: rgba(255, 255, 255, 0.35);
-        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.45);
+        border-radius: 20px;
         border-left: 5px solid {current_theme['highlight']};
-        padding: 18px 22px;
-        margin-top: 20px;
+        padding: 20px 24px;
+        margin-top: 24px;
         font-size: 0.98rem;
         color: {current_theme['text_main']};
         line-height: 1.6;
@@ -152,32 +172,32 @@ st.markdown(f"""
 
     /* 랜덤 뽑기 감성 영화 카드 */
     .movie-poster-card {{
-        background: linear-gradient(135deg, {current_theme['highlight']}22, rgba(255,255,255,0.6));
+        background: linear-gradient(135deg, {current_theme['highlight']}18, rgba(255,255,255,0.75));
         border: 2px dashed {current_theme['highlight']};
-        border-radius: 20px;
-        padding: 24px;
+        border-radius: 24px;
+        padding: 28px;
         text-align: center;
         margin-top: 15px;
         animation: fadeIn 0.6s ease-in-out;
     }}
 
     @keyframes fadeIn {{
-        from {{ opacity: 0; transform: translateY(10px); }}
+        from {{ opacity: 0; transform: translateY(12px); }}
         to {{ opacity: 1; transform: translateY(0); }}
     }}
     </style>
 """, unsafe_allow_html=True)
 
-# 5. 메인 타이틀 배너
+# 6. 메인 타이틀 배너
 st.markdown(f"""
     <div class="hero-banner">
         <div class="hero-title">🎬 영화 데이터 감성 도감</div>
-        <div class="hero-desc">박스오피스 상위권 영화 216편의 아카이브 & 시각화 탐색기</div>
+        <div class="hero-desc">박스오피스 상위권 영화 216편의 프리미엄 아카이브</div>
     </div>
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# 🎰 [쓸데없지만 예쁜 기능 2] '오늘 뭐 볼까?' 랜덤 영화 뽑기 슬롯
+# 🎰 '오늘 뭐 볼까?' 랜덤 영화 뽑기 슬롯
 # ---------------------------------------------------------
 with st.container():
     st.markdown("<div class='graph-card'>", unsafe_allow_html=True)
@@ -190,10 +210,9 @@ with st.container():
 
     if pick_trigger:
         with st.spinner("🔮 우주가 당신에게 어울리는 영화를 점지하는 중..."):
-            time.sleep(0.6) # 슬롯머신 돌아가는 듯한 감성 대기시간
+            time.sleep(0.5)
             selected_movie = df.sample(1).iloc[0]
             
-            # 흥행 칭호 부여
             audi = selected_movie['total_audi']
             if audi >= 10000000:
                 badge = "👑 천만 관객 신화의 주인공"
@@ -206,18 +225,27 @@ with st.container():
 
             st.markdown(f"""
             <div class='movie-poster-card'>
-                <span style='font-size: 0.85rem; background:{current_theme['highlight']}; color:white; padding:4px 12px; border-radius:12px;'>{badge}</span>
-                <h2 style='margin: 12px 0 6px 0; color:{current_theme['text_main']};'>{selected_movie['movieNm']}</h2>
-                <p style='color:{current_theme['text_sub']}; font-size: 0.95rem; margin-bottom: 12px;'>
+                <span style='font-size: 0.88rem; background:{current_theme['highlight']}; color:white; padding:5px 14px; border-radius:14px; font-weight:600;'>{badge}</span>
+                <h2 style='margin: 16px 0 8px 0; color:{current_theme['text_main']}; font-size: 1.8rem;'>{selected_movie['movieNm']}</h2>
+                <p style='color:{current_theme['text_sub']}; font-size: 0.98rem; margin-bottom: 14px;'>
                     <b>장르:</b> {selected_movie['genre']} | <b>제작국가:</b> {selected_movie['nation']}
                 </p>
-                <div style='display:flex; justify-content:center; gap:20px; font-size:0.9rem; color:{current_theme['text_main']};'>
+                <div style='display:flex; justify-content:center; gap:24px; font-size:0.95rem; color:{current_theme['text_main']};'>
                     <div>🎟️ <b>총 관객수:</b> {selected_movie['total_audi']:,} 명</div>
                     <div>🖥️ <b>개봉 스크린:</b> {selected_movie['first_scrn']:,} 개</div>
                 </div>
             </div>
             """, unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
+
+# Plotly 공통 폰트 및 스타일 헬퍼 함수
+def apply_chart_style(fig):
+    fig.update_layout(
+        font=dict(family=current_font['family'].replace("'", ""), color=current_theme['text_main']),
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)'
+    )
+    return fig
 
 # ---------------------------------------------------------
 # [그래프 1] 도넛 차트 - 장르 분포
@@ -235,7 +263,8 @@ with st.container():
         color_discrete_sequence=PASTEL_PALETTE
     )
     fig1.update_traces(hovertemplate="<b>장르:</b> %{label}<br><b>편수:</b> %{value}편<br><b>비율:</b> %{percent}")
-    fig1.update_layout(margin=dict(t=20, b=20), paper_bgcolor='rgba(0,0,0,0)', font=dict(color=current_theme['text_main']))
+    fig1.update_layout(margin=dict(t=20, b=20))
+    fig1 = apply_chart_style(fig1)
     
     st.plotly_chart(fig1, use_container_width=True)
     
@@ -263,7 +292,8 @@ with st.container():
         hovertemplate="<b>영화명:</b> %{label}<br><b>총 관객수:</b> %{value:,}명",
         marker=dict(cornerradius=6)
     )
-    fig2.update_layout(margin=dict(t=20, b=10, l=10, r=10), paper_bgcolor='rgba(0,0,0,0)', font=dict(color=current_theme['text_main']))
+    fig2.update_layout(margin=dict(t=20, b=10, l=10, r=10))
+    fig2 = apply_chart_style(fig2)
     
     st.plotly_chart(fig2, use_container_width=True)
     
@@ -292,11 +322,9 @@ with st.container():
     fig3.update_layout(
         bargap=0.1,
         xaxis=dict(title="총 관객수 (명)", color=current_theme['text_main']),
-        yaxis=dict(title="영화 수 (편)", color=current_theme['text_main']),
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(color=current_theme['text_main'])
+        yaxis=dict(title="영화 수 (편)", color=current_theme['text_main'])
     )
+    fig3 = apply_chart_style(fig3)
     
     st.plotly_chart(fig3, use_container_width=True)
     
@@ -335,13 +363,11 @@ with st.container():
         hovertemplate="<b>%{hovertext}</b><br><br>개봉일 스크린수: %{x:,}개<br>총 관객수: %{y:,}명"
     )
     fig4.update_layout(
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(color=current_theme['text_main']),
         xaxis=dict(gridcolor='rgba(200, 200, 200, 0.2)', title="개봉일 스크린수 (개)", color=current_theme['text_main']),
         yaxis=dict(gridcolor='rgba(200, 200, 200, 0.2)', title="총 관객수 (명)", color=current_theme['text_main']),
         legend_title_text="장르"
     )
+    fig4 = apply_chart_style(fig4)
     
     st.plotly_chart(fig4, use_container_width=True)
     
@@ -377,13 +403,11 @@ with st.container():
     )
     fig5.update_traces(hovertemplate="<b>%{hovertext}</b><br>장르: %{x}<br>총 관객수: %{y:,}명")
     fig5.update_layout(
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(color=current_theme['text_main']),
         xaxis=dict(gridcolor='rgba(200, 200, 200, 0.2)', title="주요 장르", color=current_theme['text_main']),
         yaxis=dict(gridcolor='rgba(200, 200, 200, 0.2)', title="총 관객수 (명)", color=current_theme['text_main']),
         showlegend=False
     )
+    fig5 = apply_chart_style(fig5)
     
     st.plotly_chart(fig5, use_container_width=True)
     
@@ -419,13 +443,11 @@ with st.container():
         hovertemplate="<b>%{hovertext}</b><br><br>개봉일 스크린수: %{x:,}개<br>총 관객수: %{y:,}명<br>첫 주 관객수: %{marker.size:,}명"
     )
     fig6.update_layout(
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(color=current_theme['text_main']),
         xaxis=dict(gridcolor='rgba(200, 200, 200, 0.2)', title="개봉일 스크린수 (개)", color=current_theme['text_main']),
         yaxis=dict(gridcolor='rgba(200, 200, 200, 0.2)', title="총 관객수 (명)", color=current_theme['text_main']),
         legend_title_text="장르"
     )
+    fig6 = apply_chart_style(fig6)
     
     st.plotly_chart(fig6, use_container_width=True)
     
@@ -451,11 +473,8 @@ with st.container():
         color_discrete_sequence=PASTEL_PALETTE
     )
     fig7.update_traces(hovertemplate="<b>%{label}</b><br>영화 편수: %{value}편<br>비율: %{percentParent:.1%}")
-    fig7.update_layout(
-        margin=dict(t=10, l=10, r=10, b=10),
-        paper_bgcolor='rgba(0,0,0,0)',
-        font=dict(color=current_theme['text_main'])
-    )
+    fig7.update_layout(margin=dict(t=10, l=10, r=10, b=10))
+    fig7 = apply_chart_style(fig7)
     
     st.plotly_chart(fig7, use_container_width=True)
     
