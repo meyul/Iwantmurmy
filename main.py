@@ -1,98 +1,13 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import random
+import time
 
-# 1. 페이지 설정
-st.set_page_config(page_title="영화 데이터 그래프 도감 2", layout="wide")
+# 1. 페이지 기본 설정
+st.set_page_config(page_title="영화 데이터 감성 도감", layout="wide", page_icon="🎬")
 
-# 2. 고품질 파스텔 매거진 스타일 CSS
-st.markdown("""
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;600;700&display=swap');
-
-    html, body, [class*="css"] {
-        font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-    }
-
-    /* 은은하고 고상한 핑크-라벤더 파스텔 배경 */
-    .stApp {
-        background: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
-    }
-
-    /* 카드 헤더 및 서브타이틀 */
-    .section-title {
-        color: #2D3748;
-        font-size: 1.35rem;
-        font-weight: 700;
-        margin-bottom: 5px;
-    }
-    
-    .section-subtitle {
-        color: #718096;
-        font-size: 0.95rem;
-        margin-bottom: 20px;
-    }
-
-    /* 화이트 유리 질감 카드 디자인 */
-    .graph-card {
-        background: rgba(255, 255, 255, 0.85);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.6);
-        border-radius: 24px;
-        padding: 32px;
-        box-shadow: 0 10px 30px rgba(160, 175, 200, 0.12);
-        margin-bottom: 35px;
-    }
-
-    /* 메인 타이틀 배너 */
-    .hero-banner {
-        text-align: center;
-        padding: 40px 20px 20px 20px;
-        margin-bottom: 30px;
-    }
-    
-    .hero-title {
-        font-size: 2.3rem;
-        font-weight: 700;
-        background: linear-gradient(135deg, #4A5568 0%, #718096 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin-bottom: 8px;
-    }
-    
-    .hero-desc {
-        color: #A0AEC0;
-        font-size: 1rem;
-    }
-
-    /* 알 수 있는 것 박스 (Soft Pastel Callout) */
-    .insight-container {
-        background: #F7FAFC;
-        border-radius: 16px;
-        border-left: 5px solid #CBD5E0;
-        padding: 18px 22px;
-        margin-top: 20px;
-        font-size: 0.98rem;
-        color: #4A5568;
-        line-height: 1.6;
-    }
-    
-    .highlight {
-        color: #4C51BF;
-        font-weight: 700;
-    }
-    </style>
-""", unsafe_allow_html=True)
-
-# 메인 타이틀 배너
-st.markdown("""
-    <div class="hero-banner">
-        <div class="hero-title">🎬 영화 데이터 그래프 도감 2</div>
-        <div class="hero-desc">박스오피스 상위권 영화 216편의 분포와 스크린·관객수 관계 시각화</div>
-    </div>
-""", unsafe_allow_html=True)
-
-# 3. 데이터 불러오기 및 전처리
+# 2. 데이터 불러오기 및 전처리
 @st.cache_data
 def load_data():
     url = "https://raw.githubusercontent.com/greatsong/modudata/main/data/kobis_movies.csv"
@@ -102,11 +17,207 @@ def load_data():
 
 df = load_data()
 
-# 세련된 파스텔 팔레트
-PASTEL_PALETTE = [
-    "#9AE6B4", "#90CDF4", "#FBB6CE", "#FBD38D", "#E9D8FD",
-    "#FEB2B2", "#CBD5E0", "#B2F5EA", "#FAF089", "#D6BCFA"
-]
+# 3. 🎨 4가지 테마 팔레트 & CSS 정의
+THEMES = {
+    "🌸 봄날의 벚꽃 (Cherry Blossom)": {
+        "bg": "linear-gradient(135deg, #FFFBFC 0%, #FCE4EC 50%, #F3E5F5 100%)",
+        "card_bg": "rgba(255, 255, 255, 0.75)",
+        "card_border": "rgba(248, 187, 208, 0.5)",
+        "text_main": "#4A154B",
+        "text_sub": "#AD1457",
+        "highlight": "#D81B60",
+        "palette": ["#F8BBD0", "#F48FB1", "#CE93D8", "#B39DDB", "#9FA8DA", "#90CAF9", "#80CBC4", "#A5D6A7", "#FFE082", "#FFAB91"]
+    },
+    "🌃 시티팝 나이트 (City Pop)": {
+        "bg": "linear-gradient(135deg, #0F172A 0%, #1E1B4B 50%, #311042 100%)",
+        "card_bg": "rgba(30, 27, 75, 0.55)",
+        "card_border": "rgba(192, 132, 252, 0.3)",
+        "text_main": "#F3E8FF",
+        "text_sub": "#C084FC",
+        "highlight": "#F472B6",
+        "palette": ["#F472B6", "#C084FC", "#818CF8", "#38BDF8", "#34D399", "#FBBF24", "#FB7185", "#A78BFA", "#4ADE80", "#E879F9"]
+    },
+    "☕ 따뜻한 우드 라떼 (Warm Latte)": {
+        "bg": "linear-gradient(135deg, #FAF8F5 0%, #F5EBE6 50%, #EBD9CE 100%)",
+        "card_bg": "rgba(255, 253, 250, 0.8)",
+        "card_border": "rgba(215, 186, 167, 0.5)",
+        "text_main": "#3D2B1F",
+        "text_sub": "#8C6D58",
+        "highlight": "#B85B35",
+        "palette": ["#D7BAA7", "#B85B35", "#8C6D58", "#E6C5B8", "#A3B18A", "#588157", "#D4A373", "#CCD5AE", "#E9EDC9", "#FAEDCD"]
+    },
+    "🌊 에메랄드 오션 (Emerald Ocean)": {
+        "bg": "linear-gradient(135deg, #F0FDF4 0%, #E0F2FE 50%, #E0E7FF 100%)",
+        "card_bg": "rgba(255, 255, 255, 0.75)",
+        "card_border": "rgba(125, 211, 252, 0.5)",
+        "text_main": "#0F172A",
+        "text_sub": "#0284C7",
+        "highlight": "#0D9488",
+        "palette": ["#38BDF8", "#2DD4BF", "#34D399", "#818CF8", "#A78BFA", "#F472B6", "#FBBF24", "#67E8F9", "#6EE7B7", "#93C5FD"]
+    }
+}
+
+# 사이드바 테마 스위처
+st.sidebar.markdown("### 🎨 Mood & Theme")
+selected_theme_name = st.sidebar.selectbox(
+    "어떤 분위기에서 감상할까요?",
+    list(THEMES.keys()),
+    index=0
+)
+current_theme = THEMES[selected_theme_name]
+PASTEL_PALETTE = current_theme["palette"]
+
+# 4. Dynamic CSS 적용 (글래스모피즘 + 호버 애니메이션)
+st.markdown(f"""
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;600;700&display=swap');
+
+    html, body, [class*="css"] {{
+        font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+    }}
+
+    /* 선택된 테마 배경 */
+    .stApp {{
+        background: {current_theme['bg']};
+        transition: background 0.8s ease;
+    }}
+
+    /* 글래스모피즘 카드 & Floating 호버 애니메이션 */
+    .graph-card {{
+        background: {current_theme['card_bg']};
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid {current_theme['card_border']};
+        border-radius: 28px;
+        padding: 32px;
+        box-shadow: 0 12px 32px 0 rgba(0, 0, 0, 0.05);
+        margin-bottom: 35px;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }}
+
+    .graph-card:hover {{
+        transform: translateY(-8px) scale(1.005);
+        box-shadow: 0 20px 40px 0 rgba(0, 0, 0, 0.12);
+        border-color: {current_theme['highlight']};
+    }}
+
+    /* 메인 타이틀 & 글자 색상 */
+    .hero-banner {{
+        text-align: center;
+        padding: 30px 20px 10px 20px;
+        margin-bottom: 25px;
+    }}
+    
+    .hero-title {{
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: {current_theme['text_main']};
+        margin-bottom: 8px;
+        letter-spacing: -0.5px;
+    }}
+    
+    .hero-desc {{
+        color: {current_theme['text_sub']};
+        font-size: 1.05rem;
+    }}
+
+    .section-title {{
+        color: {current_theme['text_main']};
+        font-size: 1.35rem;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }}
+    
+    .section-subtitle {{
+        color: {current_theme['text_sub']};
+        font-size: 0.92rem;
+        margin-bottom: 20px;
+    }}
+
+    .insight-container {{
+        background: rgba(255, 255, 255, 0.35);
+        border-radius: 18px;
+        border-left: 5px solid {current_theme['highlight']};
+        padding: 18px 22px;
+        margin-top: 20px;
+        font-size: 0.98rem;
+        color: {current_theme['text_main']};
+        line-height: 1.6;
+    }}
+    
+    .highlight {{
+        color: {current_theme['highlight']};
+        font-weight: 700;
+    }}
+
+    /* 랜덤 뽑기 감성 영화 카드 */
+    .movie-poster-card {{
+        background: linear-gradient(135deg, {current_theme['highlight']}22, rgba(255,255,255,0.6));
+        border: 2px dashed {current_theme['highlight']};
+        border-radius: 20px;
+        padding: 24px;
+        text-align: center;
+        margin-top: 15px;
+        animation: fadeIn 0.6s ease-in-out;
+    }}
+
+    @keyframes fadeIn {{
+        from {{ opacity: 0; transform: translateY(10px); }}
+        to {{ opacity: 1; transform: translateY(0); }}
+    }}
+    </style>
+""", unsafe_allow_html=True)
+
+# 5. 메인 타이틀 배너
+st.markdown(f"""
+    <div class="hero-banner">
+        <div class="hero-title">🎬 영화 데이터 감성 도감</div>
+        <div class="hero-desc">박스오피스 상위권 영화 216편의 아카이브 & 시각화 탐색기</div>
+    </div>
+""", unsafe_allow_html=True)
+
+# ---------------------------------------------------------
+# 🎰 [쓸데없지만 예쁜 기능 2] '오늘 뭐 볼까?' 랜덤 영화 뽑기 슬롯
+# ---------------------------------------------------------
+with st.container():
+    st.markdown("<div class='graph-card'>", unsafe_allow_html=True)
+    st.markdown("<div class='section-title'>🎰 오늘 볼 영화 무작위 추천 슬롯</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-subtitle'>데이터 속 216편의 영화 중 한 편을 무작위로 추첨해 감성 카드로 보여줍니다</div>", unsafe_allow_html=True)
+    
+    col_btn, col_empty = st.columns([1, 3])
+    with col_btn:
+        pick_trigger = st.button("✨ 영화 추천 버튼 누르기", use_container_width=True)
+
+    if pick_trigger:
+        with st.spinner("🔮 우주가 당신에게 어울리는 영화를 점지하는 중..."):
+            time.sleep(0.6) # 슬롯머신 돌아가는 듯한 감성 대기시간
+            selected_movie = df.sample(1).iloc[0]
+            
+            # 흥행 칭호 부여
+            audi = selected_movie['total_audi']
+            if audi >= 10000000:
+                badge = "👑 천만 관객 신화의 주인공"
+            elif audi >= 5000000:
+                badge = "🔥 폭발적 흥행 메가 히트작"
+            elif audi >= 1000000:
+                badge = "💎 입소문 자자한 인기 명작"
+            else:
+                badge = "🌱 알짜배기 매력 보유작"
+
+            st.markdown(f"""
+            <div class='movie-poster-card'>
+                <span style='font-size: 0.85rem; background:{current_theme['highlight']}; color:white; padding:4px 12px; border-radius:12px;'>{badge}</span>
+                <h2 style='margin: 12px 0 6px 0; color:{current_theme['text_main']};'>{selected_movie['movieNm']}</h2>
+                <p style='color:{current_theme['text_sub']}; font-size: 0.95rem; margin-bottom: 12px;'>
+                    <b>장르:</b> {selected_movie['genre']} | <b>제작국가:</b> {selected_movie['nation']}
+                </p>
+                <div style='display:flex; justify-content:center; gap:20px; font-size:0.9rem; color:{current_theme['text_main']};'>
+                    <div>🎟️ <b>총 관객수:</b> {selected_movie['total_audi']:,} 명</div>
+                    <div>🖥️ <b>개봉 스크린:</b> {selected_movie['first_scrn']:,} 개</div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
 # [그래프 1] 도넛 차트 - 장르 분포
@@ -124,14 +235,14 @@ with st.container():
         color_discrete_sequence=PASTEL_PALETTE
     )
     fig1.update_traces(hovertemplate="<b>장르:</b> %{label}<br><b>편수:</b> %{value}편<br><b>비율:</b> %{percent}")
-    fig1.update_layout(margin=dict(t=20, b=20), paper_bgcolor='rgba(0,0,0,0)')
+    fig1.update_layout(margin=dict(t=20, b=20), paper_bgcolor='rgba(0,0,0,0)', font=dict(color=current_theme['text_main']))
     
     st.plotly_chart(fig1, use_container_width=True)
     
     st.markdown(f"""
     <div class='insight-container'>
         <b>💡 이 그래프로 알 수 있는 것</b><br>
-        박스오피스 주요 영화 중 <span class='highlight'>{genre_counts.iloc[0]['장르']}</span> 장르가 가장 높은 편수를 기록하고 있으며, 전체적인 장르 치우침 현상을 한눈에 파악할 수 있습니다.
+        박스오피스 주요 영화 중 <span class='highlight'>{genre_counts.iloc[0]['장르']}</span> 장르가 가장 높은 편수를 기록하고 있으며, 전체적인 장르 편중도를 확인할 수 있습니다.
     </div>
     """, unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
@@ -150,16 +261,16 @@ with st.container():
     )
     fig2.update_traces(
         hovertemplate="<b>영화명:</b> %{label}<br><b>총 관객수:</b> %{value:,}명",
-        marker=dict(cornerradius=4)
+        marker=dict(cornerradius=6)
     )
-    fig2.update_layout(margin=dict(t=20, b=10, l=10, r=10), paper_bgcolor='rgba(0,0,0,0)')
+    fig2.update_layout(margin=dict(t=20, b=10, l=10, r=10), paper_bgcolor='rgba(0,0,0,0)', font=dict(color=current_theme['text_main']))
     
     st.plotly_chart(fig2, use_container_width=True)
     
     st.markdown("""
     <div class='insight-container'>
         <b>💡 이 그래프로 알 수 있는 것</b><br>
-        각 장르의 전체 파급력과 더불어 특정 장르 내에서 어떤 영화가 메가 히트를 기록하여 관객 비중을 이끌었는지 비교 분석할 수 있습니다.
+        각 장르의 파급력과 특정 장르 내에서 어떤 영화가 메가 히트를 기록하여 관객 비중을 이끌었는지 비교 분석할 수 있습니다.
     </div>
     """, unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
@@ -175,15 +286,16 @@ with st.container():
     fig3 = px.histogram(
         df, x="total_audi", nbins=25,
         labels={'total_audi': '총 관객수', 'count': '영화 수'},
-        color_discrete_sequence=["#B2F5EA"]
+        color_discrete_sequence=[PASTEL_PALETTE[1]]
     )
     fig3.update_traces(marker=dict(line=dict(width=1, color='white')))
     fig3.update_layout(
         bargap=0.1,
-        xaxis_title="총 관객수 (명)",
-        yaxis_title="영화 수 (편)",
+        xaxis=dict(title="총 관객수 (명)", color=current_theme['text_main']),
+        yaxis=dict(title="영화 수 (편)", color=current_theme['text_main']),
         paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)'
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(color=current_theme['text_main'])
     )
     
     st.plotly_chart(fig3, use_container_width=True)
@@ -225,8 +337,9 @@ with st.container():
     fig4.update_layout(
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
-        xaxis=dict(gridcolor='rgba(200, 200, 200, 0.2)', title="개봉일 스크린수 (개)"),
-        yaxis=dict(gridcolor='rgba(200, 200, 200, 0.2)', title="총 관객수 (명)"),
+        font=dict(color=current_theme['text_main']),
+        xaxis=dict(gridcolor='rgba(200, 200, 200, 0.2)', title="개봉일 스크린수 (개)", color=current_theme['text_main']),
+        yaxis=dict(gridcolor='rgba(200, 200, 200, 0.2)', title="총 관객수 (명)", color=current_theme['text_main']),
         legend_title_text="장르"
     )
     
@@ -235,7 +348,7 @@ with st.container():
     st.markdown("""
     <div class='insight-container'>
         <b>💡 이 그래프로 알 수 있는 것</b><br>
-        개봉일 스크린수를 많이 확보한 영화일수록 대체로 높은 총 관객수를 달성하는 양의 상관관계를 보이지만, 스크린수 대비 폭발적인 흥행 성과를 거둔 영화(아웃라이어)도 존재함을 확인할 수 있습니다.
+        개봉일 스크린수를 많이 확보한 영화일수록 대체로 높은 총 관객수를 달성하는 양의 상관관계를 보이지만, 스크린수 대비 폭발적인 흥행 성과를 거둔 아웃라이어 영화도 찾아볼 수 있습니다.
     </div>
     """, unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
@@ -262,16 +375,13 @@ with st.container():
         labels={'genre': '장르', 'total_audi': '총 관객수'},
         color_discrete_sequence=PASTEL_PALETTE
     )
-    
-    fig5.update_traces(
-        hovertemplate="<b>%{hovertext}</b><br>장르: %{x}<br>총 관객수: %{y:,}명"
-    )
-    
+    fig5.update_traces(hovertemplate="<b>%{hovertext}</b><br>장르: %{x}<br>총 관객수: %{y:,}명")
     fig5.update_layout(
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
-        xaxis=dict(gridcolor='rgba(200, 200, 200, 0.2)', title="주요 장르"),
-        yaxis=dict(gridcolor='rgba(200, 200, 200, 0.2)', title="총 관객수 (명)"),
+        font=dict(color=current_theme['text_main']),
+        xaxis=dict(gridcolor='rgba(200, 200, 200, 0.2)', title="주요 장르", color=current_theme['text_main']),
+        yaxis=dict(gridcolor='rgba(200, 200, 200, 0.2)', title="총 관객수 (명)", color=current_theme['text_main']),
         showlegend=False
     )
     
@@ -280,7 +390,7 @@ with st.container():
     st.markdown("""
     <div class='insight-container'>
         <b>💡 이 그래프로 알 수 있는 것</b><br>
-        주요 장르별 관객수의 중앙값과 상하위 편차를 한눈에 파악할 수 있으며, 상자 밖으로 멀리 떨어진 점(이상치)을 통해 동일 장르 내에서 대흥행을 기록한 대표 영화를 찾아낼 수 있습니다.
+        주요 장르별 관객수의 중앙값과 상하위 편차를 한눈에 파악할 수 있으며, 이상치 점을 통해 장르의 평균치를 훌쩍 뛰어넘은 대표 대흥행작을 식별할 수 있습니다.
     </div>
     """, unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
@@ -301,25 +411,19 @@ with st.container():
         color='genre',
         hover_name='movieNm',
         size_max=40,
-        labels={
-            'first_scrn': '개봉일 스크린수',
-            'total_audi': '총 관객수',
-            'first_week_audi': '첫 주 관객수',
-            'genre': '장르'
-        },
+        labels={'first_scrn': '개봉일 스크린수', 'total_audi': '총 관객수', 'first_week_audi': '첫 주 관객수', 'genre': '장르'},
         color_discrete_sequence=PASTEL_PALETTE
     )
-    
     fig6.update_traces(
         marker=dict(opacity=0.75, line=dict(width=1, color='white')),
         hovertemplate="<b>%{hovertext}</b><br><br>개봉일 스크린수: %{x:,}개<br>총 관객수: %{y:,}명<br>첫 주 관객수: %{marker.size:,}명"
     )
-    
     fig6.update_layout(
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
-        xaxis=dict(gridcolor='rgba(200, 200, 200, 0.2)', title="개봉일 스크린수 (개)"),
-        yaxis=dict(gridcolor='rgba(200, 200, 200, 0.2)', title="총 관객수 (명)"),
+        font=dict(color=current_theme['text_main']),
+        xaxis=dict(gridcolor='rgba(200, 200, 200, 0.2)', title="개봉일 스크린수 (개)", color=current_theme['text_main']),
+        yaxis=dict(gridcolor='rgba(200, 200, 200, 0.2)', title="총 관객수 (명)", color=current_theme['text_main']),
         legend_title_text="장르"
     )
     
@@ -328,13 +432,13 @@ with st.container():
     st.markdown("""
     <div class='insight-container'>
         <b>💡 이 그래프로 알 수 있는 것</b><br>
-        버블의 크기가 클수록 개봉 첫 주 초반 흥행 동력이 강했음을 의미합니다. 개봉일 스크린수가 다소 적었더라도 첫 주 관객수(버블 크기)가 커지며 입소문을 타고 최종 총 관객수(Y축)가 급증한 영화들을 한눈에 식별할 수 있습니다.
+        버블의 크기가 클수록 초반 흥행 동력이 강했음을 의미합니다. 개봉일 스크린수가 적었더라도 첫 주 관객수(버블 크기)가 커지며 입소문을 타고 최종 관객수가 급증한 모멘텀을 가진 영화를 발견할 수 있습니다.
     </div>
     """, unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# [그래프 7] 선버스트 차트 - 국가별 장르 분포 계층 (신규 추가)
+# [그래프 7] 선버스트 차트 - 국가별 장르 분포 계층
 # ---------------------------------------------------------
 with st.container():
     st.markdown("<div class='graph-card'>", unsafe_allow_html=True)
@@ -346,14 +450,11 @@ with st.container():
         path=['nation', 'genre'],
         color_discrete_sequence=PASTEL_PALETTE
     )
-    
-    fig7.update_traces(
-        hovertemplate="<b>%{label}</b><br>영화 편수: %{value}편<br>비율: %{percentParent:.1%}"
-    )
-    
+    fig7.update_traces(hovertemplate="<b>%{label}</b><br>영화 편수: %{value}편<br>비율: %{percentParent:.1%}")
     fig7.update_layout(
         margin=dict(t=10, l=10, r=10, b=10),
-        paper_bgcolor='rgba(0,0,0,0)'
+        paper_bgcolor='rgba(0,0,0,0)',
+        font=dict(color=current_theme['text_main'])
     )
     
     st.plotly_chart(fig7, use_container_width=True)
@@ -361,7 +462,7 @@ with st.container():
     st.markdown("""
     <div class='insight-container'>
         <b>💡 이 그래프로 알 수 있는 것</b><br>
-        국가별로 제작되거나 수입되는 주요 장르 구성의 차이를 확인할 수 있으며, 각 국가 내에서 특정 장르가 차지하는 비중과 전체 영화 수 대비 국가별 점유율을 한눈에 비교할 수 있습니다.
+        국가별로 제작되거나 수입되는 주요 장르 구성의 차이를 확인할 수 있으며, 각 국가 내에서 특정 장르가 차지하는 비중을 한눈에 파악할 수 있습니다.
     </div>
     """, unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
